@@ -11,19 +11,11 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'CDS Trial Instance'"
 		},
-		"DynamicsTrialInstance_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'DynamicsTrialInstance'"
-		},
 		"importsrc_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'importsrc'"
 		},
 		"CDS Trial Instance_properties_typeProperties_username": {
-			"type": "string",
-			"defaultValue": "bancey@sep2020test.onmicrosoft.com"
-		},
-		"DynamicsTrialInstance_properties_typeProperties_username": {
 			"type": "string",
 			"defaultValue": "bancey@sep2020test.onmicrosoft.com"
 		}
@@ -926,26 +918,6 @@
 					"password": {
 						"type": "SecureString",
 						"value": "[parameters('CDS Trial Instance_password')]"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DynamicsTrialInstance')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "Dynamics",
-				"typeProperties": {
-					"deploymentType": "Online",
-					"serviceUri": "https://sep2020test.crm11.dynamics.com/",
-					"authenticationType": "Office365",
-					"username": "[parameters('DynamicsTrialInstance_properties_typeProperties_username')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('DynamicsTrialInstance_password')]"
 					}
 				}
 			},

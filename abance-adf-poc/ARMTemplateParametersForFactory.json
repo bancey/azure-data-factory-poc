@@ -8,16 +8,10 @@
 		"CDS Trial Instance_password": {
 			"value": ""
 		},
-		"DynamicsTrialInstance_password": {
-			"value": ""
-		},
 		"importsrc_connectionString": {
 			"value": ""
 		},
 		"CDS Trial Instance_properties_typeProperties_username": {
-			"value": "bancey@sep2020test.onmicrosoft.com"
-		},
-		"DynamicsTrialInstance_properties_typeProperties_username": {
 			"value": "bancey@sep2020test.onmicrosoft.com"
 		}
 	}

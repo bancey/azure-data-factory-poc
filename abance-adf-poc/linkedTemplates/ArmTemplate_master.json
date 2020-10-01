@@ -11,19 +11,11 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'CDS Trial Instance'"
 		},
-		"DynamicsTrialInstance_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'DynamicsTrialInstance'"
-		},
 		"importsrc_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'importsrc'"
 		},
 		"CDS Trial Instance_properties_typeProperties_username": {
-			"type": "string",
-			"defaultValue": "bancey@sep2020test.onmicrosoft.com"
-		},
-		"DynamicsTrialInstance_properties_typeProperties_username": {
 			"type": "string",
 			"defaultValue": "bancey@sep2020test.onmicrosoft.com"
 		},
@@ -57,17 +49,11 @@
 					"CDS Trial Instance_password": {
 						"value": "[parameters('CDS Trial Instance_password')]"
 					},
-					"DynamicsTrialInstance_password": {
-						"value": "[parameters('DynamicsTrialInstance_password')]"
-					},
 					"importsrc_connectionString": {
 						"value": "[parameters('importsrc_connectionString')]"
 					},
 					"CDS Trial Instance_properties_typeProperties_username": {
 						"value": "[parameters('CDS Trial Instance_properties_typeProperties_username')]"
-					},
-					"DynamicsTrialInstance_properties_typeProperties_username": {
-						"value": "[parameters('DynamicsTrialInstance_properties_typeProperties_username')]"
 					}
 				}
 			},
