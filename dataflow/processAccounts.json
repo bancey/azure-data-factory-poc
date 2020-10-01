@@ -1,0 +1,42 @@
+{
+	"name": "processAccounts",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Accounts",
+						"type": "DatasetReference"
+					},
+					"name": "accounts"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "transformedCSV",
+						"type": "DatasetReference"
+					},
+					"name": "transformedAccountsOutput"
+				},
+				{
+					"dataset": {
+						"referenceName": "accountNames",
+						"type": "DatasetReference"
+					},
+					"name": "accountNames"
+				}
+			],
+			"transformations": [
+				{
+					"name": "ConvertAccountOptionSets"
+				},
+				{
+					"name": "selectAccountName"
+				}
+			],
+			"script": "source(output(\n\t\t{Account Name} as string,\n\t\t{Street 1} as string,\n\t\tCity as string,\n\t\t{Post Code} as string,\n\t\tCountry as string,\n\t\tIndustry as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> accounts\naccounts derive(Industry = case(equalsIgnoreCase(Industry, 'Consulting'), 7, case(equalsIgnoreCase(Industry, 'Accounting'), 1, 2)),\n\t\taccountid = toString(null())) ~> ConvertAccountOptionSets\naccounts select(mapColumn(\n\t\tAccountName = {Account Name}\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> selectAccountName\nConvertAccountOptionSets sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['accounts.csv'],\n\ttruncate: true,\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> transformedAccountsOutput\nselectAccountName sink(input(\n\t\tAccountName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tfilePattern:'names.csv',\n\ttruncate: true,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> accountNames"
+		}
+	}
+}

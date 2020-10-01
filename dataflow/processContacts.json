@@ -1,0 +1,48 @@
+{
+	"name": "processContacts",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Contacts",
+						"type": "DatasetReference"
+					},
+					"name": "contacts"
+				},
+				{
+					"dataset": {
+						"referenceName": "accountsNamesAndGuids",
+						"type": "DatasetReference"
+					},
+					"name": "accountGuids"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "transformedCSV",
+						"type": "DatasetReference"
+					},
+					"name": "transformedContacts"
+				}
+			],
+			"transformations": [
+				{
+					"name": "mergeAccountIdsIntoContact"
+				},
+				{
+					"name": "stripDoubleQuotes"
+				},
+				{
+					"name": "selectColumns"
+				},
+				{
+					"name": "covertOptionSets"
+				}
+			],
+			"script": "source(output(\n\t\t{First Name} as string,\n\t\t{Last Name} as string,\n\t\tEmail as string,\n\t\t{Contact Method} as string,\n\t\tAccount as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> contacts\nsource(output(\n\t\taccountid as string,\n\t\tname as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> accountGuids\ncontacts, stripDoubleQuotes join(Account == name,\n\tjoinType:'left',\n\tbroadcast: 'auto')~> mergeAccountIdsIntoContact\naccountGuids derive(name = replace(name, '\"', '')) ~> stripDoubleQuotes\nmergeAccountIdsIntoContact select(mapColumn(\n\t\t{First Name},\n\t\t{Last Name},\n\t\tEmail,\n\t\t{Contact Method},\n\t\tAccount,\n\t\taccountid\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> selectColumns\nselectColumns derive(contactid = toString(null()),\n\t\taccountentitytype = 'account',\n\t\t{Contact Method} = 1) ~> covertOptionSets\ncovertOptionSets sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['contacts.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> transformedContacts"
+		}
+	}
+}

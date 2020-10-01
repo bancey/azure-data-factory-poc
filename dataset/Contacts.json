@@ -1,0 +1,43 @@
+{
+	"name": "Contacts",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "importsrc",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"sheetName": "Contacts",
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "accounts_contacts.xlsx",
+				"container": "src"
+			},
+			"firstRowAsHeader": true
+		},
+		"schema": [
+			{
+				"name": "First Name",
+				"type": "String"
+			},
+			{
+				"name": "Last Name",
+				"type": "String"
+			},
+			{
+				"name": "Email",
+				"type": "String"
+			},
+			{
+				"name": "Contact Method",
+				"type": "String"
+			},
+			{
+				"name": "Account",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

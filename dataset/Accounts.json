@@ -1,0 +1,47 @@
+{
+	"name": "Accounts",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "importsrc",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"sheetName": "Accounts",
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "accounts_contacts.xlsx",
+				"container": "src"
+			},
+			"firstRowAsHeader": true
+		},
+		"schema": [
+			{
+				"name": "Account Name",
+				"type": "String"
+			},
+			{
+				"name": "Street 1",
+				"type": "String"
+			},
+			{
+				"name": "City",
+				"type": "String"
+			},
+			{
+				"name": "Post Code",
+				"type": "String"
+			},
+			{
+				"name": "Country",
+				"type": "String"
+			},
+			{
+				"name": "Industry",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
