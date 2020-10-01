@@ -1,0 +1,1072 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "abance-adf-poc"
+		},
+		"CDS Trial Instance_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'CDS Trial Instance'"
+		},
+		"DynamicsTrialInstance_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'DynamicsTrialInstance'"
+		},
+		"importsrc_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'importsrc'"
+		},
+		"CDS Trial Instance_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "bancey@sep2020test.onmicrosoft.com"
+		},
+		"DynamicsTrialInstance_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "bancey@sep2020test.onmicrosoft.com"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/CDS Trial Instance')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "CommonDataServiceForApps",
+				"typeProperties": {
+					"deploymentType": "Online",
+					"serviceUri": "https://sep2020test.crm11.dynamics.com/",
+					"authenticationType": "Office365",
+					"username": "[parameters('CDS Trial Instance_properties_typeProperties_username')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('CDS Trial Instance_password')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DynamicsTrialInstance')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Dynamics",
+				"typeProperties": {
+					"deploymentType": "Online",
+					"serviceUri": "https://sep2020test.crm11.dynamics.com/",
+					"authenticationType": "Office365",
+					"username": "[parameters('DynamicsTrialInstance_properties_typeProperties_username')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('DynamicsTrialInstance_password')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/importsrc')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('importsrc_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Accounts')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "importsrc",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Excel",
+				"typeProperties": {
+					"sheetName": "Accounts",
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "accounts_contacts.xlsx",
+						"container": "src"
+					},
+					"firstRowAsHeader": true
+				},
+				"schema": [
+					{
+						"name": "Account Name",
+						"type": "String"
+					},
+					{
+						"name": "Street 1",
+						"type": "String"
+					},
+					{
+						"name": "City",
+						"type": "String"
+					},
+					{
+						"name": "Post Code",
+						"type": "String"
+					},
+					{
+						"name": "Country",
+						"type": "String"
+					},
+					{
+						"name": "Industry",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/importsrc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CDS_Account')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "CDS Trial Instance",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "CommonDataServiceForAppsEntity",
+				"schema": [],
+				"typeProperties": {
+					"entityName": "account"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/CDS Trial Instance')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CDS_Contact')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "CDS Trial Instance",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "CommonDataServiceForAppsEntity",
+				"schema": [],
+				"typeProperties": {
+					"entityName": "contact"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/CDS Trial Instance')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Contacts')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "importsrc",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Excel",
+				"typeProperties": {
+					"sheetName": "Contacts",
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "accounts_contacts.xlsx",
+						"container": "src"
+					},
+					"firstRowAsHeader": true
+				},
+				"schema": [
+					{
+						"name": "First Name",
+						"type": "String"
+					},
+					{
+						"name": "Last Name",
+						"type": "String"
+					},
+					{
+						"name": "Email",
+						"type": "String"
+					},
+					{
+						"name": "Contact Method",
+						"type": "String"
+					},
+					{
+						"name": "Account",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/importsrc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/accountNames')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "importsrc",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "tmp"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "AccountName",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/importsrc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/accountsNamesAndGuids')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "importsrc",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "accountGuidMap.csv",
+						"container": "tmp"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "accountid",
+						"type": "String"
+					},
+					{
+						"name": "name",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/importsrc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/transformedAccounts')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "importsrc",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "accounts.csv",
+						"container": "transformed"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Account Name",
+						"type": "String"
+					},
+					{
+						"name": "Street 1",
+						"type": "String"
+					},
+					{
+						"name": "City",
+						"type": "String"
+					},
+					{
+						"name": "Post Code",
+						"type": "String"
+					},
+					{
+						"name": "Country",
+						"type": "String"
+					},
+					{
+						"name": "Industry",
+						"type": "String"
+					},
+					{
+						"name": "accountid",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/importsrc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/transformedCSV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "importsrc",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "transformed"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/importsrc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/transformedContacts')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "importsrc",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "contacts.csv",
+						"container": "transformed"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "First Name",
+						"type": "String"
+					},
+					{
+						"name": "Last Name",
+						"type": "String"
+					},
+					{
+						"name": "Email",
+						"type": "String"
+					},
+					{
+						"name": "Contact Method",
+						"type": "String"
+					},
+					{
+						"name": "Account",
+						"type": "String"
+					},
+					{
+						"name": "accountid",
+						"type": "String"
+					},
+					{
+						"name": "contactid",
+						"type": "String"
+					},
+					{
+						"name": "accountentitytype",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/importsrc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/processAccounts')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "Accounts",
+								"type": "DatasetReference"
+							},
+							"name": "accounts"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "transformedCSV",
+								"type": "DatasetReference"
+							},
+							"name": "transformedAccountsOutput"
+						},
+						{
+							"dataset": {
+								"referenceName": "accountNames",
+								"type": "DatasetReference"
+							},
+							"name": "accountNames"
+						}
+					],
+					"transformations": [
+						{
+							"name": "ConvertAccountOptionSets"
+						},
+						{
+							"name": "selectAccountName"
+						}
+					],
+					"script": "source(output(\n\t\t{Account Name} as string,\n\t\t{Street 1} as string,\n\t\tCity as string,\n\t\t{Post Code} as string,\n\t\tCountry as string,\n\t\tIndustry as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> accounts\naccounts derive(Industry = case(equalsIgnoreCase(Industry, 'Consulting'), 7, case(equalsIgnoreCase(Industry, 'Accounting'), 1, 2)),\n\t\taccountid = toString(null())) ~> ConvertAccountOptionSets\naccounts select(mapColumn(\n\t\tAccountName = {Account Name}\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> selectAccountName\nConvertAccountOptionSets sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['accounts.csv'],\n\ttruncate: true,\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> transformedAccountsOutput\nselectAccountName sink(input(\n\t\tAccountName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tfilePattern:'names.csv',\n\ttruncate: true,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> accountNames"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Accounts')]",
+				"[concat(variables('factoryId'), '/datasets/transformedCSV')]",
+				"[concat(variables('factoryId'), '/datasets/accountNames')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/processContacts')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "Contacts",
+								"type": "DatasetReference"
+							},
+							"name": "contacts"
+						},
+						{
+							"dataset": {
+								"referenceName": "accountsNamesAndGuids",
+								"type": "DatasetReference"
+							},
+							"name": "accountGuids"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "transformedCSV",
+								"type": "DatasetReference"
+							},
+							"name": "transformedContacts"
+						}
+					],
+					"transformations": [
+						{
+							"name": "mergeAccountIdsIntoContact"
+						},
+						{
+							"name": "stripDoubleQuotes"
+						},
+						{
+							"name": "selectColumns"
+						},
+						{
+							"name": "covertOptionSets"
+						}
+					],
+					"script": "source(output(\n\t\t{First Name} as string,\n\t\t{Last Name} as string,\n\t\tEmail as string,\n\t\t{Contact Method} as string,\n\t\tAccount as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> contacts\nsource(output(\n\t\taccountid as string,\n\t\tname as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> accountGuids\ncontacts, stripDoubleQuotes join(Account == name,\n\tjoinType:'left',\n\tbroadcast: 'auto')~> mergeAccountIdsIntoContact\naccountGuids derive(name = replace(name, '\"', '')) ~> stripDoubleQuotes\nmergeAccountIdsIntoContact select(mapColumn(\n\t\t{First Name},\n\t\t{Last Name},\n\t\tEmail,\n\t\t{Contact Method},\n\t\tAccount,\n\t\taccountid\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> selectColumns\nselectColumns derive(contactid = toString(null()),\n\t\taccountentitytype = 'account',\n\t\t{Contact Method} = 1) ~> covertOptionSets\ncovertOptionSets sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['contacts.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> transformedContacts"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Contacts')]",
+				"[concat(variables('factoryId'), '/datasets/accountsNamesAndGuids')]",
+				"[concat(variables('factoryId'), '/datasets/transformedCSV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Process CSV Import')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Insert Into CE",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "processAccounts",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "accounts*.csv"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "CommonDataServiceForAppsSink",
+								"writeBatchSize": 10,
+								"writeBehavior": "upsert",
+								"ignoreNullValues": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "Account Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Street 1",
+											"type": "String"
+										},
+										"sink": {
+											"name": "address1_line1",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "City",
+											"type": "String"
+										},
+										"sink": {
+											"name": "address1_city",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Post Code",
+											"type": "String"
+										},
+										"sink": {
+											"name": "address1_postalcode",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Country",
+											"type": "String"
+										},
+										"sink": {
+											"name": "address1_country",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Industry",
+											"type": "Int32"
+										},
+										"sink": {
+											"name": "industrycode",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"name": "accountid",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "accountid",
+											"type": "Guid"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "transformedAccounts",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "CDS_Account",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "AccountNames",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Insert Into CE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "names*.csv"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "accountNames",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "For Each Account Name",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "AccountNames",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('AccountNames').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Set local1 to fetchFilter",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "local1",
+										"value": {
+											"value": "@variables('fetchFilter')",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Set fetchFilter",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "Set local1 to fetchFilter",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "fetchFilter",
+										"value": {
+											"value": "@concat(variables('local1'), '<value>', item().AccountName, '</value>')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Get Account GUIDs",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "For Each Account Name",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "CommonDataServiceForAppsSource",
+								"query": {
+									"value": "@concat('<fetch><entity name=\"account\"><attribute name=\"accountid\"/><attribute name=\"name\"/><filter type=\"and\"><condition attribute=\"name\" operator=\"in\">', variables('fetchFilter'), '</condition></filter></entity></fetch>')",
+									"type": "Expression"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "CDS_Account",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "accountsNamesAndGuids",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "processContacts",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Get Account GUIDs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "processContacts",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"contacts": {},
+									"accountGuids": {},
+									"transformedContacts": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							}
+						}
+					},
+					{
+						"name": "processAccounts",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "processAccounts",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"accounts": {},
+									"transformedAccountsOutput": {},
+									"accountNames": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							}
+						}
+					},
+					{
+						"name": "Insert Contacts Into CE",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "processContacts",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "CommonDataServiceForAppsSink",
+								"writeBatchSize": 10,
+								"writeBehavior": "upsert"
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "accountid",
+											"type": "Guid",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "parentcustomerid",
+											"type": "Guid"
+										}
+									},
+									{
+										"source": {
+											"name": "accountentitytype",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "parentcustomerid@EntityReference"
+										}
+									},
+									{
+										"source": {
+											"name": "Account",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "parentcustomeridname",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "contactid",
+											"type": "Guid",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "contactid",
+											"type": "Guid"
+										}
+									},
+									{
+										"source": {
+											"name": "First Name",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "firstname",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Last Name",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "lastname",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Email",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "emailaddress1",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Contact Method",
+											"type": "Int32",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "preferredcontactmethodcode",
+											"type": "Int32"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "transformedContacts",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "CDS_Contact",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"variables": {
+					"local1": {
+						"type": "String"
+					},
+					"fetchFilter": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2020-10-01T11:05:25Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/transformedAccounts')]",
+				"[concat(variables('factoryId'), '/datasets/CDS_Account')]",
+				"[concat(variables('factoryId'), '/datasets/accountNames')]",
+				"[concat(variables('factoryId'), '/datasets/accountsNamesAndGuids')]",
+				"[concat(variables('factoryId'), '/dataflows/processContacts')]",
+				"[concat(variables('factoryId'), '/dataflows/processAccounts')]",
+				"[concat(variables('factoryId'), '/datasets/transformedContacts')]",
+				"[concat(variables('factoryId'), '/datasets/CDS_Contact')]"
+			]
+		}
+	]
+}

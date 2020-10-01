@@ -1,0 +1,77 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "abance-adf-poc"
+		},
+		"CDS Trial Instance_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'CDS Trial Instance'"
+		},
+		"DynamicsTrialInstance_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'DynamicsTrialInstance'"
+		},
+		"importsrc_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'importsrc'"
+		},
+		"CDS Trial Instance_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "bancey@sep2020test.onmicrosoft.com"
+		},
+		"DynamicsTrialInstance_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "bancey@sep2020test.onmicrosoft.com"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "abance-adf-poc_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"CDS Trial Instance_password": {
+						"value": "[parameters('CDS Trial Instance_password')]"
+					},
+					"DynamicsTrialInstance_password": {
+						"value": "[parameters('DynamicsTrialInstance_password')]"
+					},
+					"importsrc_connectionString": {
+						"value": "[parameters('importsrc_connectionString')]"
+					},
+					"CDS Trial Instance_properties_typeProperties_username": {
+						"value": "[parameters('CDS Trial Instance_properties_typeProperties_username')]"
+					},
+					"DynamicsTrialInstance_properties_typeProperties_username": {
+						"value": "[parameters('DynamicsTrialInstance_properties_typeProperties_username')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
