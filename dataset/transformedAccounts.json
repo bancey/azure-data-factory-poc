@@ -40,7 +40,7 @@
 				"type": "String"
 			},
 			{
-				"name": "Industry",
+				"name": "Ownership",
 				"type": "String"
 			},
 			{
