@@ -518,6 +518,72 @@
 								"parameters": {}
 							}
 						]
+					},
+					{
+						"name": "Delete contents of Transformed container",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "Insert Contacts Into CE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "transformedContainer",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"wildcardFileName": "*"
+							}
+						}
+					},
+					{
+						"name": "Delete contents of tmp container",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "Delete contents of Transformed container",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "tmpContainer",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"wildcardFileName": "*"
+							}
+						}
 					}
 				],
 				"variables": {
@@ -542,7 +608,9 @@
 				"[concat(variables('factoryId'), '/dataflows/processContacts')]",
 				"[concat(variables('factoryId'), '/dataflows/processAccounts')]",
 				"[concat(variables('factoryId'), '/datasets/transformedContacts')]",
-				"[concat(variables('factoryId'), '/datasets/CDS_Contact')]"
+				"[concat(variables('factoryId'), '/datasets/CDS_Contact')]",
+				"[concat(variables('factoryId'), '/datasets/transformedContainer')]",
+				"[concat(variables('factoryId'), '/datasets/tmpContainer')]"
 			]
 		},
 		{
@@ -753,6 +821,28 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/tmpContainer')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "importsrc",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "tmp"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/importsrc')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/transformedAccounts')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -892,6 +982,28 @@
 						"type": "String"
 					}
 				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/importsrc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/transformedContainer')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "importsrc",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "transformed"
+					}
+				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/importsrc')]"
