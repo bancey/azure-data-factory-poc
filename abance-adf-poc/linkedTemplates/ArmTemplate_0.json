@@ -18,6 +18,10 @@
 		"CDS Trial Instance_properties_typeProperties_username": {
 			"type": "string",
 			"defaultValue": "bancey@sep2020test.onmicrosoft.com"
+		},
+		"triggerOnUpload_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/9ff4c4e6-1921-4e8f-a68c-be2353ce09f7/resourceGroups/adf-test/providers/Microsoft.Storage/storageAccounts/importsrc"
 		}
 	},
 	"variables": {
@@ -99,7 +103,7 @@
 						"type": "String"
 					},
 					{
-						"name": "Industry",
+						"name": "Ownership",
 						"type": "String"
 					}
 				]
@@ -308,7 +312,7 @@
 						"type": "String"
 					},
 					{
-						"name": "Industry",
+						"name": "Ownership",
 						"type": "String"
 					},
 					{
@@ -449,7 +453,7 @@
 							"name": "selectAccountName"
 						}
 					],
-					"script": "source(output(\n\t\t{Account Name} as string,\n\t\t{Street 1} as string,\n\t\tCity as string,\n\t\t{Post Code} as string,\n\t\tCountry as string,\n\t\tIndustry as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> accounts\naccounts derive(Industry = case(equalsIgnoreCase(Industry, 'Consulting'), 7, case(equalsIgnoreCase(Industry, 'Accounting'), 1, 2)),\n\t\taccountid = toString(null())) ~> ConvertAccountOptionSets\naccounts select(mapColumn(\n\t\tAccountName = {Account Name}\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> selectAccountName\nConvertAccountOptionSets sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['accounts.csv'],\n\ttruncate: true,\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> transformedAccountsOutput\nselectAccountName sink(input(\n\t\tAccountName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tfilePattern:'names.csv',\n\ttruncate: true,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> accountNames"
+					"script": "source(output(\n\t\t{Account Name} as string,\n\t\t{Street 1} as string,\n\t\tCity as string,\n\t\t{Post Code} as string,\n\t\tCountry as string,\n\t\tOwnership as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> accounts\naccounts derive(Ownership = case(equalsIgnoreCase(Ownership, 'Public'), 1, \r\n    case(equalsIgnoreCase(Ownership, 'Private'), 2, \r\n        case(equalsIgnoreCase(Ownership, 'Subsidiary'), 3, \r\n            case(equalsIgnoreCase(Ownership, 'Other'), 4, toInteger(null()))\r\n            )\r\n        )\r\n    ),\n\t\taccountid = toString(null())) ~> ConvertAccountOptionSets\naccounts select(mapColumn(\n\t\tAccountName = {Account Name}\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> selectAccountName\nConvertAccountOptionSets sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['accounts.csv'],\n\ttruncate: true,\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> transformedAccountsOutput\nselectAccountName sink(input(\n\t\tAccountName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tfilePattern:'names.csv',\n\ttruncate: true,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> accountNames"
 				}
 			},
 			"dependsOn": [
@@ -563,7 +567,8 @@
 									{
 										"source": {
 											"name": "Account Name",
-											"type": "String"
+											"type": "String",
+											"physicalType": "String"
 										},
 										"sink": {
 											"name": "name",
@@ -573,7 +578,8 @@
 									{
 										"source": {
 											"name": "Street 1",
-											"type": "String"
+											"type": "String",
+											"physicalType": "String"
 										},
 										"sink": {
 											"name": "address1_line1",
@@ -583,7 +589,8 @@
 									{
 										"source": {
 											"name": "City",
-											"type": "String"
+											"type": "String",
+											"physicalType": "String"
 										},
 										"sink": {
 											"name": "address1_city",
@@ -593,7 +600,8 @@
 									{
 										"source": {
 											"name": "Post Code",
-											"type": "String"
+											"type": "String",
+											"physicalType": "String"
 										},
 										"sink": {
 											"name": "address1_postalcode",
@@ -603,7 +611,8 @@
 									{
 										"source": {
 											"name": "Country",
-											"type": "String"
+											"type": "String",
+											"physicalType": "String"
 										},
 										"sink": {
 											"name": "address1_country",
@@ -612,18 +621,20 @@
 									},
 									{
 										"source": {
-											"name": "Industry",
-											"type": "Int32"
+											"name": "Ownership",
+											"type": "Int32",
+											"physicalType": "String"
 										},
 										"sink": {
-											"name": "industrycode",
+											"name": "ownershipcode",
 											"type": "Int32"
 										}
 									},
 									{
 										"source": {
 											"name": "accountid",
-											"type": "Guid"
+											"type": "Guid",
+											"physicalType": "String"
 										},
 										"sink": {
 											"name": "accountid",
@@ -1038,6 +1049,37 @@
 				"[concat(variables('factoryId'), '/dataflows/processAccounts')]",
 				"[concat(variables('factoryId'), '/datasets/transformedContacts')]",
 				"[concat(variables('factoryId'), '/datasets/CDS_Contact')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/triggerOnUpload')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Process CSV Import",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/src/blobs/",
+					"blobPathEndsWith": "accounts_contacts.xlsx",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('triggerOnUpload_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Process CSV Import')]"
 			]
 		}
 	]
