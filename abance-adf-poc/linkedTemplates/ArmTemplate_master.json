@@ -19,7 +19,7 @@
 			"type": "string",
 			"defaultValue": "bancey@sep2020test.onmicrosoft.com"
 		},
-		"triggerOnUpload_properties_typeProperties_scope": {
+		"triggerOnBlobUpload_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/9ff4c4e6-1921-4e8f-a68c-be2353ce09f7/resourceGroups/adf-test/providers/Microsoft.Storage/storageAccounts/importsrc"
 		},
@@ -59,8 +59,8 @@
 					"CDS Trial Instance_properties_typeProperties_username": {
 						"value": "[parameters('CDS Trial Instance_properties_typeProperties_username')]"
 					},
-					"triggerOnUpload_properties_typeProperties_scope": {
-						"value": "[parameters('triggerOnUpload_properties_typeProperties_scope')]"
+					"triggerOnBlobUpload_properties_typeProperties_scope": {
+						"value": "[parameters('triggerOnBlobUpload_properties_typeProperties_scope')]"
 					}
 				}
 			},

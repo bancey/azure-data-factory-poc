@@ -19,7 +19,7 @@
 			"type": "string",
 			"defaultValue": "bancey@sep2020test.onmicrosoft.com"
 		},
-		"triggerOnUpload_properties_typeProperties_scope": {
+		"triggerOnBlobUpload_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/9ff4c4e6-1921-4e8f-a68c-be2353ce09f7/resourceGroups/adf-test/providers/Microsoft.Storage/storageAccounts/importsrc"
 		}
@@ -1052,12 +1052,12 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/triggerOnUpload')]",
+			"name": "[concat(parameters('factoryName'), '/triggerOnBlobUpload')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Stopped",
+				"runtimeState": "Started",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -1072,7 +1072,7 @@
 					"blobPathBeginsWith": "/src/blobs/",
 					"blobPathEndsWith": "accounts_contacts.xlsx",
 					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('triggerOnUpload_properties_typeProperties_scope')]",
+					"scope": "[parameters('triggerOnBlobUpload_properties_typeProperties_scope')]",
 					"events": [
 						"Microsoft.Storage.BlobCreated"
 					]

@@ -14,7 +14,7 @@
 		"CDS Trial Instance_properties_typeProperties_username": {
 			"value": "bancey@sep2020test.onmicrosoft.com"
 		},
-		"triggerOnUpload_properties_typeProperties_scope": {
+		"triggerOnBlobUpload_properties_typeProperties_scope": {
 			"value": "/subscriptions/9ff4c4e6-1921-4e8f-a68c-be2353ce09f7/resourceGroups/adf-test/providers/Microsoft.Storage/storageAccounts/importsrc"
 		}
 	}
