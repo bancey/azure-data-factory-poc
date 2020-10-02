@@ -729,7 +729,7 @@
 									"typeProperties": {
 										"variableName": "fetchFilterValues",
 										"value": {
-											"value": "@concat(variables('local1'), '<value>', item().AccountName, '</value>')",
+											"value": "@concat('<value>', item().AccountName, '</value>')",
 											"type": "Expression"
 										}
 									}
