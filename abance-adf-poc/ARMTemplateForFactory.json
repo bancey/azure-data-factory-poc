@@ -233,32 +233,12 @@
 							},
 							"activities": [
 								{
-									"name": "Set local1 to fetchFilter",
-									"type": "SetVariable",
+									"name": "Append fetch value condition",
+									"type": "AppendVariable",
 									"dependsOn": [],
 									"userProperties": [],
 									"typeProperties": {
-										"variableName": "local1",
-										"value": {
-											"value": "@variables('fetchFilter')",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "Set fetchFilter",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "Set local1 to fetchFilter",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "fetchFilter",
+										"variableName": "fetchFilterValues",
 										"value": {
 											"value": "@concat(variables('local1'), '<value>', item().AccountName, '</value>')",
 											"type": "Expression"
@@ -291,7 +271,7 @@
 							"source": {
 								"type": "CommonDataServiceForAppsSource",
 								"query": {
-									"value": "@concat('<fetch><entity name=\"account\"><attribute name=\"accountid\"/><attribute name=\"name\"/><filter type=\"and\"><condition attribute=\"name\" operator=\"in\">', variables('fetchFilter'), '</condition></filter></entity></fetch>')",
+									"value": "@concat('<fetch><entity name=\"account\"><attribute name=\"accountid\"/><attribute name=\"name\"/><filter type=\"and\"><condition attribute=\"name\" operator=\"in\">', join(variables('fetchFilterValues'), ''), '</condition></filter></entity></fetch>')",
 									"type": "Expression"
 								}
 							},
@@ -546,6 +526,9 @@
 					},
 					"fetchFilter": {
 						"type": "String"
+					},
+					"fetchFilterValues": {
+						"type": "Array"
 					}
 				},
 				"annotations": [],
@@ -948,6 +931,37 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/triggerOnBlobUpload')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Process CSV Import",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/src/blobs/",
+					"blobPathEndsWith": "accounts_contacts.xlsx",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('triggerOnBlobUpload_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Process CSV Import')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/processAccounts')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -1049,37 +1063,6 @@
 				"[concat(variables('factoryId'), '/datasets/Contacts')]",
 				"[concat(variables('factoryId'), '/datasets/accountsNamesAndGuids')]",
 				"[concat(variables('factoryId'), '/datasets/transformedCSV')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/triggerOnBlobUpload')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "Process CSV Import",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/src/blobs/",
-					"blobPathEndsWith": "accounts_contacts.xlsx",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('triggerOnBlobUpload_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/Process CSV Import')]"
 			]
 		}
 	]

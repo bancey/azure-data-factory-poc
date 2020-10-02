@@ -722,32 +722,12 @@
 							},
 							"activities": [
 								{
-									"name": "Set local1 to fetchFilter",
-									"type": "SetVariable",
+									"name": "Append fetch value condition",
+									"type": "AppendVariable",
 									"dependsOn": [],
 									"userProperties": [],
 									"typeProperties": {
-										"variableName": "local1",
-										"value": {
-											"value": "@variables('fetchFilter')",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "Set fetchFilter",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "Set local1 to fetchFilter",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "fetchFilter",
+										"variableName": "fetchFilterValues",
 										"value": {
 											"value": "@concat(variables('local1'), '<value>', item().AccountName, '</value>')",
 											"type": "Expression"
@@ -780,7 +760,7 @@
 							"source": {
 								"type": "CommonDataServiceForAppsSource",
 								"query": {
-									"value": "@concat('<fetch><entity name=\"account\"><attribute name=\"accountid\"/><attribute name=\"name\"/><filter type=\"and\"><condition attribute=\"name\" operator=\"in\">', variables('fetchFilter'), '</condition></filter></entity></fetch>')",
+									"value": "@concat('<fetch><entity name=\"account\"><attribute name=\"accountid\"/><attribute name=\"name\"/><filter type=\"and\"><condition attribute=\"name\" operator=\"in\">', join(variables('fetchFilterValues'), ''), '</condition></filter></entity></fetch>')",
 									"type": "Expression"
 								}
 							},
@@ -1035,6 +1015,9 @@
 					},
 					"fetchFilter": {
 						"type": "String"
+					},
+					"fetchFilterValues": {
+						"type": "Array"
 					}
 				},
 				"annotations": [],
